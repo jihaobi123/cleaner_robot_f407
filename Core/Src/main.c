@@ -23,6 +23,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "comm_luban.h"
+#include "bsp_drivetrain.h"
+#include "bsp_cleaning.h"
+#include "bsp_sensors.h"
+#include "robot_state_machine.h"
 
 /* USER CODE END Includes */
 
@@ -92,6 +97,11 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
+  Drivetrain_Init();
+  Cleaning_Init();
+  Sensors_Init();
+  Comm_Luban_Init(&huart3);
+  RobotSM_Init();
 
   /* USER CODE END 2 */
 
@@ -102,6 +112,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    Comm_Luban_Poll();
+    Sensors_Poll();
+    RobotSM_Update();
   }
   /* USER CODE END 3 */
 }
