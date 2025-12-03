@@ -31,7 +31,12 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+/*
+ * 头文件说明：
+ * main.h 统一包含 HAL 库头文件，并声明 Error_Handler 供各模块调用。
+ * 若需新增外设句柄或全局配置参数，请在 "USER CODE" 区域定义，
+ * 避免被 CubeMX 重新生成时覆盖。
+ */
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

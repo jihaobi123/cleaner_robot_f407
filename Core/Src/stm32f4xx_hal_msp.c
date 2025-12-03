@@ -21,7 +21,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 /* USER CODE BEGIN Includes */
-
+/*
+ * MSP（MCU Support Package）初始化文件：
+ * 用于全局外设时钟及中断优先级的基础配置。当前仅开启了 SYSCFG 与 PWR 时钟，
+ * 其余外设的时钟在对应的 xxx_MspInit 函数中按需开启，保持初始化职责分离。
+ */
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,7 +68,7 @@ void HAL_MspInit(void)
 {
 
   /* USER CODE BEGIN MspInit 0 */
-
+  /* 可在此添加独立看门狗、调试接口保持等全局性初始化。 */
   /* USER CODE END MspInit 0 */
 
   __HAL_RCC_SYSCFG_CLK_ENABLE();
