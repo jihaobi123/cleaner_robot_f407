@@ -20,9 +20,11 @@
 #include "main.h"
 #include "tim.h"
 #include "gpio.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "robot_comm.h"
 
 /* USER CODE END Includes */
 
@@ -91,7 +93,9 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM8_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  RobotComm_Init(&huart2);
 
   /* USER CODE END 2 */
 
@@ -102,6 +106,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    RobotComm_Process();
   }
   /* USER CODE END 3 */
 }
