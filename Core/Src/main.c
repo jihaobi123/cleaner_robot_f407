@@ -23,7 +23,16 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+/*
+ * 中文说明：
+ * 本工程采用 STM32CubeMX 生成的 HAL 框架，入口文件 main.c 负责按顺序完成以下工作：
+ * 1. HAL_Init()：复位外设、配置 Flash 接口、初始化 Systick，这一步确保 HAL 库的时序基准可用。
+ * 2. SystemClock_Config()：配置系统时钟树，使内核时钟、总线时钟满足外设工作频率需求。
+ * 3. MX_GPIO_Init() 与各 MX_TIMx_Init()：初始化在 CubeMX 中勾选的 GPIO 和定时器外设，
+ *    包括 PWM 通道和外部中断输入脚。后续用户逻辑可在 while(1) 循环中调用 HAL 驱动进行控制。
+ *
+ * 在 “USER CODE” 标记之间添加的注释与代码不会被重新生成时覆盖，可用于描述业务逻辑和调试信息。
+ */
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,6 +101,11 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
+  /*
+   * 此处可启动 PWM 或开启外部中断回调等业务逻辑。例如：
+   * HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+   * 目前保持空实现，方便后续根据实际机器人底盘、电机驱动进行扩展。
+   */
 
   /* USER CODE END 2 */
 
@@ -115,6 +129,14 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /*
+   * 时钟树说明：
+   * - 选择 HSI（16MHz 内部高速时钟）作为 PLL 输入源。
+   * - PLLM=8、PLLN=168、PLLP=2 的组合得到 SYSCLK = 168MHz，
+   *   对应 APB1=42MHz（倍频到 84MHz 供定时器使用），APB2=84MHz。
+   * - FLASH_LATENCY_5 对应 168MHz 下的等待周期配置。
+   * 该配置为多数电机 PWM 与串口通信提供足够的性能余量。
+   */
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
