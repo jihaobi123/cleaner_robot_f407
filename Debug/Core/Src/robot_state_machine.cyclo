@@ -1,0 +1,3 @@
+../Core/Src/robot_state_machine.c:28:13:set_state	2
+../Core/Src/robot_state_machine.c:38:6:RobotSM_Init	1
+../Core/Src/robot_state_machine.c:44:6:RobotSM_Update	20

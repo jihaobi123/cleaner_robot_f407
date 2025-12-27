@@ -1,0 +1,17 @@
+../Core/Src/comm_luban.c:54:17:crc16_update	3
+../Core/Src/comm_luban.c:72:17:crc16_compute	2
+../Core/Src/comm_luban.c:82:13:rb_push	2
+../Core/Src/comm_luban.c:93:13:rb_pop	2
+../Core/Src/comm_luban.c:104:13:parser_reset	1
+../Core/Src/comm_luban.c:114:13:send_frame	5
+../Core/Src/comm_luban.c:147:13:send_error	1
+../Core/Src/comm_luban.c:152:13:handle_cmd_send_task	2
+../Core/Src/comm_luban.c:175:13:handle_cmd_request_status	1
+../Core/Src/comm_luban.c:180:13:handle_cmd_cancel_task	1
+../Core/Src/comm_luban.c:185:13:handle_cmd_emergency_stop	1
+../Core/Src/comm_luban.c:190:13:handle_frame	5
+../Core/Src/comm_luban.c:212:6:Comm_Luban_Init	2
+../Core/Src/comm_luban.c:227:6:Comm_Luban_Poll	17
+../Core/Src/comm_luban.c:316:6:Comm_Luban_GetNextTask	3
+../Core/Src/comm_luban.c:334:6:Comm_Luban_SendStatus	3
+../Core/Src/comm_luban.c:352:6:HAL_UART_RxCpltCallback	2

@@ -1,0 +1,5 @@
+../Core/Src/bsp_sensors.c:23:6:Sensors_Init	1
+../Core/Src/bsp_sensors.c:30:6:Sensors_Poll	1
+../Core/Src/bsp_sensors.c:42:13:Sensors_GetState	1
+../Core/Src/bsp_sensors.c:48:6:Sensors_ClearEvents	1
+../Core/Src/bsp_sensors.c:60:6:HAL_GPIO_EXTI_Callback	6

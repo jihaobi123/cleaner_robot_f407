@@ -15,7 +15,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "stm32f4xx_hal.h"
+#include "usart.h"
 
 typedef enum
 {
@@ -41,10 +41,10 @@ typedef struct
   uint8_t priority;
 } LubanTask;
 
-void Comm_Luban_Init(UART_HandleTypeDef *huart);
-void Comm_Luban_Poll(void);
-bool Comm_Luban_GetNextTask(LubanTask *out);
-void Comm_Luban_SendStatus(const char *status_str);
+void Comm_Luban_Init(UART_HandleTypeDef *huart); /* 初始化通信模块，绑定 UART 并启动中断接收。 */
+void Comm_Luban_Poll(void); /* 主循环轮询解析 UART 帧，触发命令处理。 */
+bool Comm_Luban_GetNextTask(LubanTask *out); /* 获取最新任务，若有新任务返回 true 并填充 out。 */
+void Comm_Luban_SendStatus(const char *status_str); /* 发送状态字符串响应（RESP_STATUS）。 */
 
 #ifdef __cplusplus
 }

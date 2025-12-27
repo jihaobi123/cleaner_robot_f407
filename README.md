@@ -34,7 +34,7 @@
 
 ### 2.1 差速驱动
 
-- 右轮 PWM：TIM8 CH1 -> PC6
+- 右轮 PWM：TIM8 CH2 -> PC7
 - 左轮 PWM：TIM3 CH2 -> PB5
 
 ### 2.2 清扫子系统
@@ -112,7 +112,7 @@ uint8   priority
 ### 4.2 差速驱动 bsp_drivetrain
 
 - `Drivetrain_Init()`：启动左右轮 PWM
-- `Drivetrain_SetRaw(left, right)`：设置左右轮速度，范围 [-1.0, 1.0]
+- `Drivetrain_SetRaw(right, left)`：设置左右轮速度，范围 [-1.0, 1.0]
   - 正值表示前进
   - 负值表示反转（当前只计算幅值，方向 GPIO TODO）
 - `Drivetrain_Stop()`：停止输出 PWM

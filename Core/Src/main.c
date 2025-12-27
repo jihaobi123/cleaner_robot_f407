@@ -1,4 +1,4 @@
-/* USER CODE BEGIN Header */
+﻿/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -28,6 +28,7 @@
 #include "bsp_cleaning.h"
 #include "bsp_sensors.h"
 #include "robot_state_machine.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,6 +97,7 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
+  MX_USART3_UART_Init();
   Drivetrain_Init();
   Cleaning_Init();
   Sensors_Init();
@@ -111,11 +113,31 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    Comm_Luban_Poll();
-    Sensors_Poll();
-    RobotSM_Update();
+    static uint8_t test_done = 0U;
+  if (test_done == 0U)
+  {
+    Drivetrain_SetRaw(0.67f, 0.4f);    // IN2=0, PWM=40%
+    HAL_Delay(2000);
+
+    Drivetrain_SetRaw(-0.4f, -0.4f);  // IN2=1, PWM=60%
+    HAL_Delay(2000);
+
+    Drivetrain_SetRaw(0.67f, -0.4f);   // 左40%(IN2=0) 右60%(IN2=1)
+    HAL_Delay(2000);
+
+    Drivetrain_SetRaw(-0.4f, 0.4f);   // 左60%(IN2=1) 右40%(IN2=0)
+    HAL_Delay(2000);
+
+    Drivetrain_Stop();
+    test_done = 1U;
   }
-  /* USER CODE END 3 */
+  else
+  {
+    Drivetrain_Stop();
+    HAL_Delay(1000);
+  }
+    /* USER CODE END 3 */
+  }
 }
 
 /**
@@ -199,3 +221,4 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+

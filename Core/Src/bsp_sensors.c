@@ -22,12 +22,14 @@ static SensorState s_state;
 
 void Sensors_Init(void)
 {
+  /* 传感器初始化（GPIO/EXTI 已由 CubeMX 配置）。 */
   /* GPIO and EXTI are configured by CubeMX. */
   Sensors_ClearEvents();
 }
 
 void Sensors_Poll(void)
 {
+  /* 轮询将中断事件快照更新到状态。 */
   SensorState snapshot;
 
   __disable_irq();
@@ -39,11 +41,13 @@ void Sensors_Poll(void)
 
 SensorState Sensors_GetState(void)
 {
+  /* 读取当前传感器状态。 */
   return s_state;
 }
 
 void Sensors_ClearEvents(void)
 {
+  /* 清除中断触发事件标志。 */
   __disable_irq();
   s_events.bump_left = false;
   s_events.bump_right = false;
@@ -55,6 +59,7 @@ void Sensors_ClearEvents(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+  /* EXTI 回调：根据触发引脚设置对应传感器事件。 */
   if (GPIO_Pin == PIN_BUMP_LEFT)
   {
     s_events.bump_left = true;

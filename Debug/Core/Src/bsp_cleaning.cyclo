@@ -1,0 +1,6 @@
+../Core/Src/bsp_cleaning.c:14:6:Cleaning_Init	1
+../Core/Src/bsp_cleaning.c:46:6:Cleaning_SetBrush	1
+../Core/Src/bsp_cleaning.c:53:6:Cleaning_SetBrushLeft	1
+../Core/Src/bsp_cleaning.c:59:6:Cleaning_SetBrushRight	1
+../Core/Src/bsp_cleaning.c:65:6:Cleaning_SetPump	1
+../Core/Src/bsp_cleaning.c:71:6:Cleaning_SetFan	1

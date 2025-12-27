@@ -37,11 +37,13 @@ static void set_state(RobotState new_state)
 
 void RobotSM_Init(void)
 {
+  /* 初始化状态机，进入默认工作状态。 */
   set_state(ROBOT_STATE_FORWARD);
 }
 
 void RobotSM_Update(void)
 {
+  /* 主循环周期调用，执行状态切换与控制输出。 */
   uint32_t now_ms = HAL_GetTick();
   uint32_t elapsed = now_ms - s_state_enter_ms;
   SensorState sensors;

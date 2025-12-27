@@ -211,6 +211,7 @@ static void handle_frame(uint8_t cmd_id, const uint8_t *payload, uint16_t payloa
 
 void Comm_Luban_Init(UART_HandleTypeDef *huart)
 {
+  /* 初始化通信模块：绑定 UART 并启动中断接收。 */
   s_huart = huart;
   parser_reset();
   s_rb_head = 0;
@@ -225,6 +226,7 @@ void Comm_Luban_Init(UART_HandleTypeDef *huart)
 
 void Comm_Luban_Poll(void)
 {
+  /* 主循环调用：解析接收缓冲并处理完整帧。 */
   uint8_t byte;
 
   while (rb_pop(&byte))
@@ -313,6 +315,7 @@ void Comm_Luban_Poll(void)
 
 bool Comm_Luban_GetNextTask(LubanTask *out)
 {
+  /* 获取最新任务，成功时返回 true 并清除待处理标志。 */
   if (out == NULL)
   {
     return false;
@@ -330,6 +333,7 @@ bool Comm_Luban_GetNextTask(LubanTask *out)
 
 void Comm_Luban_SendStatus(const char *status_str)
 {
+  /* 发送状态字符串响应（RESP_STATUS）。 */
   uint16_t len = 0;
 
   if (status_str != NULL)
@@ -347,6 +351,7 @@ void Comm_Luban_SendStatus(const char *status_str)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+  /* UART 接收中断回调：写入环形缓冲并续接收。 */
   if (huart == s_huart)
   {
     rb_push(s_rx_byte);

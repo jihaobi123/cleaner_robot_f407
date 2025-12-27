@@ -26,8 +26,8 @@ typedef enum
   ROBOT_STATE_AVOID_CLIFF_FRONT,
 } RobotState;
 
-void RobotSM_Init(void);
-void RobotSM_Update(void);
+void RobotSM_Init(void); /* 初始化状态机，进入默认工作状态。 */
+void RobotSM_Update(void); /* 主循环周期调用，执行状态切换与控制输出。 */
 
 #ifdef __cplusplus
 }

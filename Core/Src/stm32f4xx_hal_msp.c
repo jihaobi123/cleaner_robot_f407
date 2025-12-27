@@ -21,7 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 /* USER CODE BEGIN Includes */
-
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,5 +78,16 @@ void HAL_MspInit(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{
+  /* 初始化 USART3 时钟与中断。 */
+  if (huart->Instance == USART3)
+  {
+    __HAL_RCC_USART3_CLK_ENABLE();
+    HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART3_IRQn);
+  }
+}
 
 /* USER CODE END 1 */

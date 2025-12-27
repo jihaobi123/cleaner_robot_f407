@@ -1,0 +1,7 @@
+../Core/Src/usart.c:16:17:uart_get_pclk	3
+../Core/Src/usart.c:25:19:HAL_UART_Init	4
+../Core/Src/usart.c:66:19:HAL_UART_Transmit	9
+../Core/Src/usart.c:99:19:HAL_UART_Receive_IT	4
+../Core/Src/usart.c:114:6:HAL_UART_IRQHandler	7
+../Core/Src/usart.c:141:13:HAL_UART_RxCpltCallback	1
+../Core/Src/usart.c:146:6:MX_USART3_UART_Init	2
