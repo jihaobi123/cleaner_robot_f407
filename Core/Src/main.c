@@ -113,29 +113,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    static uint8_t test_done = 0U;
-  if (test_done == 0U)
-  {
-    Drivetrain_SetRaw(0.67f, 0.4f);    // IN2=0, PWM=40%
-    HAL_Delay(2000);
+	  Drivetrain_SetUnits(0.5f, -0.5f);
+	    HAL_Delay(2000);
 
-    Drivetrain_SetRaw(-0.4f, -0.4f);  // IN2=1, PWM=60%
-    HAL_Delay(2000);
+	    Drivetrain_SetUnits(2.0f, -1.0f);
+	    HAL_Delay(2000);
 
-    Drivetrain_SetRaw(0.67f, -0.4f);   // 左40%(IN2=0) 右60%(IN2=1)
-    HAL_Delay(2000);
+	    Drivetrain_SetUnits(-2.0f, -2.0f);
+	    HAL_Delay(2000);
 
-    Drivetrain_SetRaw(-0.4f, 0.4f);   // 左60%(IN2=1) 右40%(IN2=0)
-    HAL_Delay(2000);
-
-    Drivetrain_Stop();
-    test_done = 1U;
-  }
-  else
-  {
-    Drivetrain_Stop();
-    HAL_Delay(1000);
-  }
+	    Drivetrain_Stop();
+	    HAL_Delay(2000);
     /* USER CODE END 3 */
   }
 }

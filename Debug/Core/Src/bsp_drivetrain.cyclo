@@ -1,7 +1,9 @@
 ../Core/Src/bsp_drivetrain.c:23:14:clamp_norm	3
 ../Core/Src/bsp_drivetrain.c:30:17:duty_to_ccr	3
-../Core/Src/bsp_drivetrain.c:48:13:set_wheel_user_map	11
-../Core/Src/bsp_drivetrain.c:79:6:Drivetrain_Init	1
-../Core/Src/bsp_drivetrain.c:105:6:Drivetrain_SetRaw	1
-../Core/Src/bsp_drivetrain.c:117:6:Drivetrain_Stop	1
-../Core/Src/bsp_drivetrain.c:127:6:Drivetrain_SetDirection	1
+../Core/Src/bsp_drivetrain.c:46:13:set_wheel_user_map	10
+../Core/Src/bsp_drivetrain.c:76:6:Drivetrain_Init	1
+../Core/Src/bsp_drivetrain.c:102:6:Drivetrain_SetRaw	1
+../Core/Src/bsp_drivetrain.c:114:6:Drivetrain_Stop	1
+../Core/Src/bsp_drivetrain.c:124:6:Drivetrain_SetDirection	1
+../Core/Src/bsp_drivetrain.c:133:7:Drivetrain_UnitToNorm	5
+../Core/Src/bsp_drivetrain.c:166:6:Drivetrain_SetUnits	1
