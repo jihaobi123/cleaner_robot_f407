@@ -16,17 +16,19 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-void Drivetrain_Init(void); /* 鍚姩宸﹀彸杞?PWM 杈撳嚭閫氶亾銆?*/
-void Drivetrain_SetRaw(float left_norm, float right_norm); /* 璁剧疆宸﹀彸杞綊涓€鍖栭€熷害 [-1,1]锛岃礋鍊间负鍙嶈浆棰勭暀銆?*/
-void Drivetrain_Stop(void); /* 绔嬪嵆鍋滄宸﹀彸杞?PWM 杈撳嚭銆?*/
-void Drivetrain_SetDirection(bool left_forward, bool right_forward); /* 璁剧疆宸﹀彸杞鍙嶈浆鏂瑰悜 GPIO銆?*/
+void Drivetrain_Init(void); /* Start left/right PWM outputs. */
+void Drivetrain_SetRaw(float left_norm, float right_norm); /* Set normalized speed [-1,1]. */
+void Drivetrain_Stop(void); /* Stop left/right PWM outputs. */
+void Drivetrain_SetDirection(bool left_forward, bool right_forward); /* Set direction GPIO. */
 
 float Drivetrain_UnitToNorm(float units); /* Map speed units to norm. */
 void Drivetrain_SetUnits(float left_units, float right_units); /* Drive using speed units. */
+void Drivetrain_SetTwist(float v_linear, float v_angular); /* Twist to wheel units mapping. */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* BSP_DRIVETRAIN_H */
+
 

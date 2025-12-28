@@ -32,6 +32,9 @@ typedef enum
   RESP_ERROR = 0xFF
 } LubanRespId;
 
+/* 新增速度控制命令 */
+#define CMD_SET_TWIST  0x10
+
 typedef struct
 {
   uint32_t task_id;
@@ -45,6 +48,8 @@ void Comm_Luban_Init(UART_HandleTypeDef *huart); /* 初始化通信模块，绑�
 void Comm_Luban_Poll(void); /* 主循环轮询解析 UART 帧，触发命令处理。 */
 bool Comm_Luban_GetNextTask(LubanTask *out); /* 获取最新任务，若有新任务返回 true 并填充 out。 */
 void Comm_Luban_SendStatus(const char *status_str); /* 发送状态字符串响应（RESP_STATUS）。 */
+void Comm_Luban_Watchdog(void); /* 超过 300ms 未收到速度指令则刹车。 */
+void Comm_UART1_TestInit(void); /* 启动 UART1 回显测试（验证链路）。 */
 
 #ifdef __cplusplus
 }

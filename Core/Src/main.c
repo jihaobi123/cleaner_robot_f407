@@ -1,4 +1,4 @@
-﻿/* USER CODE BEGIN Header */
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -96,12 +97,14 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM8_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   MX_USART3_UART_Init();
   Drivetrain_Init();
   Cleaning_Init();
   Sensors_Init();
   Comm_Luban_Init(&huart3);
+  Comm_UART1_TestInit();
   RobotSM_Init();
 
   /* USER CODE END 2 */
@@ -113,17 +116,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  Drivetrain_SetUnits(0.5f, -0.5f);
-	    HAL_Delay(2000);
+    /* 周期通过 UART3 发送心跳，验证上行链路 */
+   /* static uint32_t uart3_tx_tick = 0;
+    if ((HAL_GetTick() - uart3_tx_tick) > 1000U)
+    {
+      uart3_tx_tick = HAL_GetTick();
+      const char hb3[] = "UART3_PING\r\n";
+      (void)HAL_UART_Transmit(&huart3, (uint8_t *)hb3, (uint16_t)(sizeof(hb3) - 1U), 20);
+    }*/
 
-	    Drivetrain_SetUnits(2.0f, -1.0f);
-	    HAL_Delay(2000);
-
-	    Drivetrain_SetUnits(-2.0f, -2.0f);
-	    HAL_Delay(2000);
-
-	    Drivetrain_Stop();
-	    HAL_Delay(2000);
+    Comm_Luban_Poll();
+    Comm_Luban_Watchdog();
     /* USER CODE END 3 */
   }
 }
@@ -209,4 +212,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-

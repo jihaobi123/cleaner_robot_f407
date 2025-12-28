@@ -257,6 +257,12 @@ void EXTI15_10_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+void USART1_IRQHandler(void)
+{
+  /* USART1 中断转交给 HAL 处理（用于接收中断回调）。 */
+  HAL_UART_IRQHandler(&huart1);
+}
+
 void USART3_IRQHandler(void)
 {
   /* USART3 中断转交给 HAL 处理（用于接收中断回调）。 */

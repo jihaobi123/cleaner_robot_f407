@@ -8,6 +8,8 @@
 /* USER CODE END Header */
 
 #include "comm_luban.h"
+#include "bsp_drivetrain.h"
+#include "usart.h"
 #include <string.h>
 
 #define COMM_LUBAN_HEADER_0            0xAA
@@ -15,14 +17,16 @@
 #define COMM_LUBAN_RX_BUF_SIZE         512
 #define COMM_LUBAN_MAX_PAYLOAD         256
 #define COMM_LUBAN_TX_TIMEOUT_MS       20
+#define COMM_LUBAN_VERSION             0x01
+#define COMM_LUBAN_WD_TIMEOUT_MS       300
 
 typedef enum
 {
   PARSER_WAIT_H0 = 0,
   PARSER_WAIT_H1,
-  PARSER_READ_CMD,
-  PARSER_READ_LEN0,
-  PARSER_READ_LEN1,
+  PARSER_READ_VER,
+  PARSER_READ_MSG,
+  PARSER_READ_LEN,
   PARSER_READ_PAYLOAD,
   PARSER_READ_CRC0,
   PARSER_READ_CRC1
@@ -31,9 +35,10 @@ typedef enum
 typedef struct
 {
   ParserState state;
+  uint8_t version;
   uint8_t cmd_id;
-  uint16_t payload_len;
-  uint16_t payload_idx;
+  uint8_t payload_len;
+  uint8_t payload_idx;
   uint8_t payload[COMM_LUBAN_MAX_PAYLOAD];
   uint16_t crc_recv;
   uint16_t crc_calc;
@@ -41,6 +46,7 @@ typedef struct
 
 static UART_HandleTypeDef *s_huart = NULL;
 static uint8_t s_rx_byte = 0;
+static uint8_t s_uart1_rx_byte = 0;
 
 static volatile uint16_t s_rb_head = 0;
 static volatile uint16_t s_rb_tail = 0;
@@ -51,19 +57,21 @@ static ParserCtx s_parser;
 static LubanTask s_last_task;
 static volatile bool s_task_pending = false;
 
+static uint32_t s_last_twist_tick = 0;
+
+/* CCITT-FALSE: poly 0x1021 init 0xFFFF */
 static uint16_t crc16_update(uint16_t crc, uint8_t data)
 {
-  /* Replace with your CRC16 update function if different. */
-  crc ^= data;
+  crc ^= (uint16_t)(data << 8);
   for (uint8_t i = 0; i < 8; i++)
   {
-    if (crc & 0x0001)
+    if (crc & 0x8000)
     {
-      crc = (crc >> 1) ^ 0xA001;
+      crc = (crc << 1) ^ 0x1021;
     }
     else
     {
-      crc >>= 1;
+      crc <<= 1;
     }
   }
   return crc;
@@ -104,6 +112,7 @@ static bool rb_pop(uint8_t *out)
 static void parser_reset(void)
 {
   s_parser.state = PARSER_WAIT_H0;
+  s_parser.version = 0;
   s_parser.cmd_id = 0;
   s_parser.payload_len = 0;
   s_parser.payload_idx = 0;
@@ -113,7 +122,7 @@ static void parser_reset(void)
 
 static void send_frame(uint8_t resp_id, const uint8_t *payload, uint16_t payload_len)
 {
-  uint8_t frame[2 + 1 + 2 + COMM_LUBAN_MAX_PAYLOAD + 2];
+  uint8_t frame[2 + 1 + 1 + 1 + COMM_LUBAN_MAX_PAYLOAD + 2];
   uint16_t idx = 0;
   uint16_t crc;
 
@@ -124,9 +133,9 @@ static void send_frame(uint8_t resp_id, const uint8_t *payload, uint16_t payload
 
   frame[idx++] = COMM_LUBAN_HEADER_0;
   frame[idx++] = COMM_LUBAN_HEADER_1;
+  frame[idx++] = COMM_LUBAN_VERSION;
   frame[idx++] = resp_id;
   frame[idx++] = (uint8_t)(payload_len & 0xFF);
-  frame[idx++] = (uint8_t)((payload_len >> 8) & 0xFF);
 
   if (payload_len > 0 && payload != NULL)
   {
@@ -134,7 +143,8 @@ static void send_frame(uint8_t resp_id, const uint8_t *payload, uint16_t payload
     idx = (uint16_t)(idx + payload_len);
   }
 
-  crc = crc16_compute(&frame[2], (uint16_t)(1 + 2 + payload_len));
+  /* CRC 覆盖 Header+Version+MsgID+Len+Payload */
+  crc = crc16_compute(frame, (uint16_t)(2 + 1 + 1 + 1 + payload_len));
   frame[idx++] = (uint8_t)(crc & 0xFF);
   frame[idx++] = (uint8_t)((crc >> 8) & 0xFF);
 
@@ -148,6 +158,12 @@ static void send_error(uint8_t code)
 {
   send_frame(RESP_ERROR, &code, 1);
 }
+
+typedef struct
+{
+  int32_t vx_mm_s;
+  int32_t wz_mrad_s;
+} CmdTwist;
 
 static void handle_cmd_send_task(const uint8_t *payload, uint16_t len)
 {
@@ -187,10 +203,39 @@ static void handle_cmd_emergency_stop(void)
   Comm_Luban_SendStatus("EMERGENCY_STOP");
 }
 
+static void handle_cmd_set_twist(const uint8_t *payload, uint16_t len)
+{
+  if (len != 8U)
+  {
+    send_error(0x11);
+    return;
+  }
+
+  CmdTwist cmd;
+  memcpy(&cmd.vx_mm_s,  &payload[0], 4);
+  memcpy(&cmd.wz_mrad_s, &payload[4], 4);
+
+  /* 单位换算 */
+  float v_linear  = (float)cmd.vx_mm_s * 0.001f;   /* mm/s -> m/s */
+  float v_angular = (float)cmd.wz_mrad_s * 0.001f; /* mrad/s -> rad/s */
+
+  Drivetrain_SetTwist(v_linear, v_angular);
+  s_last_twist_tick = HAL_GetTick();
+
+  /* 回执：收到速度指令 */
+  {
+    const char ack[] = "TWIST_OK";
+    send_frame(RESP_STATUS, (const uint8_t *)ack, (uint16_t)(sizeof(ack) - 1U));
+  }
+}
+
 static void handle_frame(uint8_t cmd_id, const uint8_t *payload, uint16_t payload_len)
 {
   switch (cmd_id)
   {
+  case CMD_SET_TWIST:
+    handle_cmd_set_twist(payload, payload_len);
+    break;
   case CMD_SEND_TASK:
     handle_cmd_send_task(payload, payload_len);
     break;
@@ -217,11 +262,18 @@ void Comm_Luban_Init(UART_HandleTypeDef *huart)
   s_rb_head = 0;
   s_rb_tail = 0;
   s_task_pending = false;
+  s_last_twist_tick = HAL_GetTick();
 
   if (s_huart != NULL)
   {
     (void)HAL_UART_Receive_IT(s_huart, &s_rx_byte, 1);
   }
+}
+
+void Comm_UART1_TestInit(void)
+{
+  /* 启动 UART1 回显测试，仅用于链路验证。 */
+  (void)HAL_UART_Receive_IT(&huart1, &s_uart1_rx_byte, 1);
 }
 
 void Comm_Luban_Poll(void)
@@ -242,8 +294,10 @@ void Comm_Luban_Poll(void)
     case PARSER_WAIT_H1:
       if (byte == COMM_LUBAN_HEADER_1)
       {
-        s_parser.state = PARSER_READ_CMD;
         s_parser.crc_calc = 0xFFFF;
+        s_parser.crc_calc = crc16_update(s_parser.crc_calc, COMM_LUBAN_HEADER_0);
+        s_parser.crc_calc = crc16_update(s_parser.crc_calc, COMM_LUBAN_HEADER_1);
+        s_parser.state = PARSER_READ_VER;
       }
       else if (byte == COMM_LUBAN_HEADER_0)
       {
@@ -254,18 +308,18 @@ void Comm_Luban_Poll(void)
         s_parser.state = PARSER_WAIT_H0;
       }
       break;
-    case PARSER_READ_CMD:
+    case PARSER_READ_VER:
+      s_parser.version = byte;
+      s_parser.crc_calc = crc16_update(s_parser.crc_calc, byte);
+      s_parser.state = PARSER_READ_MSG;
+      break;
+    case PARSER_READ_MSG:
       s_parser.cmd_id = byte;
       s_parser.crc_calc = crc16_update(s_parser.crc_calc, byte);
-      s_parser.state = PARSER_READ_LEN0;
+      s_parser.state = PARSER_READ_LEN;
       break;
-    case PARSER_READ_LEN0:
+    case PARSER_READ_LEN:
       s_parser.payload_len = byte;
-      s_parser.crc_calc = crc16_update(s_parser.crc_calc, byte);
-      s_parser.state = PARSER_READ_LEN1;
-      break;
-    case PARSER_READ_LEN1:
-      s_parser.payload_len |= (uint16_t)(byte << 8);
       s_parser.crc_calc = crc16_update(s_parser.crc_calc, byte);
       s_parser.payload_idx = 0;
       if (s_parser.payload_len > COMM_LUBAN_MAX_PAYLOAD)
@@ -273,7 +327,7 @@ void Comm_Luban_Poll(void)
         send_error(3);
         parser_reset();
       }
-      else if (s_parser.payload_len == 0)
+      else if (s_parser.payload_len == 0U)
       {
         s_parser.state = PARSER_READ_CRC0;
       }
@@ -296,7 +350,8 @@ void Comm_Luban_Poll(void)
       break;
     case PARSER_READ_CRC1:
       s_parser.crc_recv |= (uint16_t)(byte << 8);
-      if (s_parser.crc_recv == s_parser.crc_calc)
+      if (s_parser.version == COMM_LUBAN_VERSION &&
+          s_parser.crc_recv == s_parser.crc_calc)
       {
         handle_frame(s_parser.cmd_id, s_parser.payload, s_parser.payload_len);
       }
@@ -351,10 +406,25 @@ void Comm_Luban_SendStatus(const char *status_str)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  /* UART 接收中断回调：写入环形缓冲并续接收。 */
   if (huart == s_huart)
   {
+    /* 入环形缓冲并继续中断接收 */
     rb_push(s_rx_byte);
     (void)HAL_UART_Receive_IT(s_huart, &s_rx_byte, 1);
+  }
+  else if (huart == &huart1)
+  {
+    /* UART1 回显测试：收到什么回什么 */
+    (void)HAL_UART_Transmit(&huart1, &s_uart1_rx_byte, 1, 20);
+    (void)HAL_UART_Receive_IT(&huart1, &s_uart1_rx_byte, 1);
+  }
+}
+
+void Comm_Luban_Watchdog(void)
+{
+  if ((HAL_GetTick() - s_last_twist_tick) > COMM_LUBAN_WD_TIMEOUT_MS)
+  {
+    Drivetrain_Stop();
+    s_last_twist_tick = HAL_GetTick();
   }
 }

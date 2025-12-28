@@ -1,9 +1,10 @@
 ../Core/Src/bsp_drivetrain.c:23:14:clamp_norm	16	static
 ../Core/Src/bsp_drivetrain.c:30:17:duty_to_ccr	24	static
-../Core/Src/bsp_drivetrain.c:46:13:set_wheel_user_map	48	static
-../Core/Src/bsp_drivetrain.c:76:6:Drivetrain_Init	40	static
-../Core/Src/bsp_drivetrain.c:102:6:Drivetrain_SetRaw	24	static
-../Core/Src/bsp_drivetrain.c:114:6:Drivetrain_Stop	8	static
-../Core/Src/bsp_drivetrain.c:124:6:Drivetrain_SetDirection	16	static
-../Core/Src/bsp_drivetrain.c:133:7:Drivetrain_UnitToNorm	40	static
-../Core/Src/bsp_drivetrain.c:166:6:Drivetrain_SetUnits	24	static
+../Core/Src/bsp_drivetrain.c:48:13:set_wheel_user_map	48	static
+../Core/Src/bsp_drivetrain.c:78:6:Drivetrain_Init	40	static
+../Core/Src/bsp_drivetrain.c:104:6:Drivetrain_SetRaw	24	static
+../Core/Src/bsp_drivetrain.c:116:6:Drivetrain_Stop	8	static
+../Core/Src/bsp_drivetrain.c:126:6:Drivetrain_SetDirection	16	static
+../Core/Src/bsp_drivetrain.c:135:7:Drivetrain_UnitToNorm	40	static
+../Core/Src/bsp_drivetrain.c:168:6:Drivetrain_SetUnits	24	static
+../Core/Src/bsp_drivetrain.c:174:6:Drivetrain_SetTwist	32	static
